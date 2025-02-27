@@ -61,7 +61,6 @@ const Trangchu = () => {
                 />
                 <p className="card-price">{item.price}</p>
                 <div className="card-footer">
-                <Button type="primary" block className="card-button" onClick={() => navigate(`/product/${item.id}`)}>
                     Xem chi tiết
                   </Button>
                 </div>
