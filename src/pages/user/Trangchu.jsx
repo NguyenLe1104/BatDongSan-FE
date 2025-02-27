@@ -2,8 +2,6 @@ import React from "react";
 import { Card, Col, Row, Button } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import '../../style/Trangchu.css';
-import bds1 from '../../assets/productImages/bds1.jpg';
-import bds2 from '../../assets/productImages/bds2.jpg';
 import { useNavigate } from "react-router-dom";
 
 const { Meta } = Card;
@@ -15,28 +13,28 @@ const trangChuSanPhamData = [
     title: "Biệt thự biển sang trọng",
     description: "Thanh Khê",
     price: "15 tỷ VNĐ",
-    image: bds1
+    image: require("../../assets/productImages/bds1.jpg")
   },
   {
     id: 2,
     title: "Nhà phố hiện đại",
     description: "Sơn Trà",
     price: "7 tỷ VNĐ",
-    image: bds2
+    image: require("../../assets/productImages/bds2.jpg")
   },
   {
     id: 3,
     title: "Biệt thự ven sông",
     description: "Hải Châu",
     price: "20 tỷ VNĐ",
-    image: bds1
+    image: require("../../assets/productImages/bds2.jpg")
   },
   {
     id: 4,
     title: "Căn hộ cao cấp",
     description: "Hòa Vang",
     price: "10 tỷ VNĐ",
-    image: bds2
+    image: require("../../assets/productImages/bds2.jpg")
   }
 ];
 
@@ -61,6 +59,10 @@ const Trangchu = () => {
                 />
                 <p className="card-price">{item.price}</p>
                 <div className="card-footer">
+                  <Button 
+                    type="primary"
+                    onClick={() => navigate(`/chitietsanpham/${item.id}`)}
+                  >
                     Xem chi tiết
                   </Button>
                 </div>
