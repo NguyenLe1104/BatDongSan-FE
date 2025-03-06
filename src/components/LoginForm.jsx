@@ -1,145 +1,144 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import loginImage from '../assets/login.png';
+import loginImage from "../assets/login.png";
 import axios from "axios";
-function LoginForm() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const navigate = useNavigate();
-    const roles = JSON.parse(localStorage.getItem("roles")) || [];
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError("");
+function LoginForm() { // Bỏ prop toggleForm
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-        try {
-            const response = await axios.post("http://localhost:5000/api/login", {
-                username,
-                password
-            });
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
 
-            if (response.data?.token) {
-                localStorage.setItem("token", response.data.token);
-                localStorage.setItem("username", username);
-                localStorage.setItem("roles", JSON.stringify(response.data.roles || []));
+    try {
+      const response = await axios.post("http://localhost:5000/api/login", {
+        username,
+        password,
+      });
 
-                window.dispatchEvent(new Event("storage")); // Cập nhật Header ngay lập tức
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("username", username);
+        localStorage.setItem("roles", JSON.stringify(response.data.roles || []));
 
-                alert("Đăng nhập thành công!");
-                if (response.data.roles?.includes("ADMIN")) {
-                    navigate("/admin", { replace: true });
-                } else {
-                    navigate("/", { replace: true });
-                }
-            }
-            else {
-                setError("Dữ liệu phản hồi không hợp lệ!");
-            }
-        } catch (error) {
-            console.error("Lỗi đăng nhập:", error);
-            setError(error.response?.data?.error || "Đăng nhập thất bại!");
+        window.dispatchEvent(new Event("storage"));
+
+        alert("Đăng nhập thành công!");
+        if (response.data.roles?.includes("ADMIN")) {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/", { replace: true });
         }
-    };
-    return (
-        <>
-            <div className="container d-flex justify-content-center align-items-center vh-100 bg-light">
-                <div className="row bg-white shadow rounded overflow-hidden" style={{ maxWidth: "900px" }}>
-                    {/* Left Side */}
-                    <div className="col-md-5 d-flex flex-column justify-content-center align-items-center bg-light p-4">
-                        <img
-                            src={loginImage} // Thay link này bằng logo của bạn
-                            alt="Login"
-                            className="mb-3"
-                            style={{ width: "200px" }}
-                        />
-                        <p className="text-danger text-center fw-bold">
-                            Nơi khởi nguồn tổ ấm, đầu tư vững bền.
-                        </p>
-                    </div>
+      } else {
+        setError("Dữ liệu phản hồi không hợp lệ!");
+      }
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
+      setError(error.response?.data?.error || "Đăng nhập thất bại!");
+    }
+  };
 
-                    {/* Right Side */}
-                    <div className="col-md-7 p-4">
-                        <h2 className="text-start fs-6 fw-bold">Xin chào bạn</h2>
-                        <h4 className="text-start fw-bold mb-4 fs-4">Đăng nhập để tiếp tục</h4>
+  return (
+    <>
+      <div className="container d-flex justify-content-center align-items-center vh-100 bg-light">
+        <div className="row bg-white shadow rounded overflow-hidden" style={{ maxWidth: "900px" }}>
+          <div className="col-md-5 d-flex flex-column justify-content-center align-items-center bg-light p-4">
+            <img
+              src={loginImage}
+              alt="Login"
+              className="mb-3"
+              style={{ width: "200px" }}
+            />
+            <p className="text-danger text-center fw-bold">
+              Nơi khởi nguồn tổ ấm, đầu tư vững bền.
+            </p>
+          </div>
 
-                        <form onSubmit={handleLogin}>
-                            {/* Số điện thoại hoặc email */}
-                            <div className="mb-3">
+          <div className="col-md-7 p-4">
+            <h2 className="text-start fs-6 fw-bold">Xin chào bạn</h2>
+            <h4 className="text-start fw-bold mb-4 fs-4">Đăng nhập để tiếp tục</h4>
 
-                                <div className="input-group">
-                                    <span className="input-group-text">
-                                        <i className="bi bi-person"></i>
-                                    </span>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="username"
-                                        placeholder="Nhập tài khoản"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                    />
-                                </div>
-                            </div>
+            {error && <div className="alert alert-danger">{error}</div>}
 
-                            {/* Mật khẩu */}
-                            <div className="mb-3">
-                                <div className="input-group">
-                                    <span className="input-group-text">
-                                        <i className="bi bi-lock"></i>
-                                    </span>
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        id="password"
-                                        placeholder="Nhập mật khẩu"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                    <button className="btn btn-outline-secondary" type="button">
-                                        <i className="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Nhớ tài khoản và quên mật khẩu */}
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <input type="checkbox" id="rememberMe" />
-                                    <label htmlFor="rememberMe" className="ms-2">
-                                        Nhớ tài khoản
-                                    </label>
-                                </div>
-                                <a href="/forgot-password" className="text-danger text-decoration-none">
-                                    Quên mật khẩu?
-                                </a>
-                            </div>
-
-                            {/* Đăng nhập */}
-                            <button type="submit" className="btn btn-danger w-100 mb-3">
-                                Đăng nhập
-                            </button>
-
-                            {/* Hoặc đăng nhập với Google */}
-                            <div className="text-center text-muted mb-3">Hoặc</div>
-                            <button type="button" className="btn btn-outline-primary w-100">
-                                <i className="bi bi-google me-2"></i>Đăng nhập với Google
-                            </button>
-                        </form>
-
-                        {/* Đăng ký */}
-                        <p className="text-center mt-3">
-                            Chưa là thành viên?{" "}
-                            <a href="/register" className="text-danger text-decoration-none">
-                                Đăng ký
-                            </a>
-                            {" "}tại đây
-                        </p>
-                    </div>
+            <form onSubmit={handleLogin}>
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-person"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="username"
+                    placeholder="Nhập tài khoản"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                 </div>
-            </div>
-        </>
-    );
+              </div>
+
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="bi bi-lock"></i>
+                  </span>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    placeholder="Nhập mật khẩu"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button className="btn btn-outline-secondary" type="button">
+                    <i className="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <input type="checkbox" id="rememberMe" />
+                  <label htmlFor="rememberMe" className="ms-2">
+                    Nhớ tài khoản
+                  </label>
+                  </div>
+                <button
+                  className="text-danger text-decoration-none btn btn-link"
+                  onClick={() => navigate("/forgot-password")} // Điều hướng đến form quên mật khẩu
+                >
+                  Quên mật khẩu?
+                </button>
+              </div>
+
+              <button type="submit" className="btn btn-danger w-100 mb-3">
+                Đăng nhập
+              </button>
+
+              <div className="text-center text-muted mb-3">Hoặc</div>
+              <button type="button" className="btn btn-outline-primary w-100">
+                <i className="bi bi-google me-2"></i>Đăng nhập với Google
+              </button>
+            </form>
+
+            <p className="text-center mt-3">
+              Chưa là thành viên?{" "}
+              <button
+                className="text-danger text-decoration-none btn btn-link"
+                onClick={() => navigate("/dang-ky")} // Điều hướng đến trang đăng ký
+              >
+                Đăng ký
+              </button>{" "}
+              tại đây
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
-export default LoginForm; 
+export default LoginForm;

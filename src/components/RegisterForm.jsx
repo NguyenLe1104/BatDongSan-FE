@@ -1,15 +1,18 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Thêm useNavigate
 import Footer from "./Footer";
 import loginImage from "../assets/login.png";
 
-function RegisterForm({ toggleForm }) {
+function RegisterForm() { // Bỏ prop toggleForm
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [soDienThoai, setSoDienThoai] = useState("");
+  const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState(""); 
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Thêm useNavigate
 
   const validateForm = () => {
     const newErrors = {};
@@ -25,6 +28,9 @@ function RegisterForm({ toggleForm }) {
     } else if (!/^\d{10,11}$/.test(soDienThoai)) {
       newErrors.soDienThoai = "Số điện thoại không hợp lệ.";
     }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Email không hợp lệ.";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -32,41 +38,42 @@ function RegisterForm({ toggleForm }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(""); 
+    setMessage("");
     if (!validateForm()) return;
 
-    setLoading(true); 
+    setLoading(true);
 
     try {
       const userData = {
         username,
         password,
-        HoTen: "Người dùng mới",
         SoDienThoai: soDienThoai,
-        email: `${username}@example.com`,
-        DiaChi: "Chưa cập nhật",
-        TrangThai: 1,
+        email: email || undefined,
       };
 
-      console.log("Dữ liệu gửi lên API:", userData);
-
-      const response = await fetch("http://localhost:5000/api/users/addUser", {
+      const response = await fetch("http://localhost:5000/api/admin/users/addUser", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
-    });
+      });
 
       const result = await response.json();
       if (!response.ok) {
-        console.error("Lỗi từ API:", response.status, result);
-        setMessage(`Lỗi đăng ký: ${result.message || "Có lỗi xảy ra."}`);
+        if (response.status === 400) {
+          setMessage(`Lỗi: ${result.error}`);
+        } else {
+          setMessage("⚠️ Có lỗi xảy ra, vui lòng thử lại sau.");
+        }
       } else {
         setMessage("🎉 Đăng ký thành công! Bạn có thể đăng nhập ngay.");
+        setTimeout(() => {
+          navigate("/dang-nhap"); // Điều hướng về trang đăng nhập
+        }, 2000);
       }
     } catch (error) {
-      console.error("Lỗi khi gọi API:", error);
+      console.error("Lỗi khi gọi API:", error.message);
       setMessage("⚠️ Có lỗi xảy ra, vui lòng thử lại sau.");
     } finally {
       setLoading(false);
@@ -84,37 +91,86 @@ function RegisterForm({ toggleForm }) {
           <h2 className="text-start fs-6 fw-bold">Xin chào bạn</h2>
           <h4 className="text-start fw-bold mb-4 fs-4">Đăng ký tài khoản</h4>
 
-          {message && <div className={`alert ${message.includes("thành công") ? "alert-success" : "alert-danger"}`} role="alert">{message}</div>}
+          {message && (
+            <div className={`alert ${message.includes("thành công") ? "alert-success" : "alert-danger"}`} role="alert">
+              {message}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <input type="text" className={`form-control ${errors.soDienThoai ? "is-invalid" : ""}`} placeholder="Nhập số điện thoại" value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
+              <input
+                type="text"
+                className={`form-control ${errors.soDienThoai ? "is-invalid" : ""}`}
+                placeholder="Nhập số điện thoại"
+                value={soDienThoai}
+                onChange={(e) => setSoDienThoai(e.target.value)}
+              />
               {errors.soDienThoai && <div className="text-danger mb-2">{errors.soDienThoai}</div>}
             </div>
 
             <div className="mb-3">
-              <input type="text" className={`form-control ${errors.username ? "is-invalid" : ""}`} placeholder="Nhập tên tài khoản" value={username} onChange={(e) => setUsername(e.target.value)} />
+              <input
+                type="text"
+                className={`form-control ${errors.username ? "is-invalid" : ""}`}
+                placeholder="Nhập tên tài khoản"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
               {errors.username && <div className="text-danger mb-2">{errors.username}</div>}
             </div>
 
             <div className="mb-3">
-              <input type="password" className={`form-control ${errors.password ? "is-invalid" : ""}`} placeholder="Nhập mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <input
+                type="email"
+                className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                placeholder="Nhập email (tùy chọn)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {errors.email && <div className="text-danger mb-2">{errors.email}</div>}
+            </div>
+
+            <div className="mb-3">
+              <input
+                type="password"
+                className={`form-control ${errors.password ? "is-invalid" : ""}`}
+                placeholder="Nhập mật khẩu"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
               {errors.password && <div className="text-danger mb-2">{errors.password}</div>}
             </div>
 
             <div className="mb-3">
-              <input type="password" className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`} placeholder="Xác nhận mật khẩu" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              <input
+                type="password"
+                className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
+                placeholder="Xác nhận mật khẩu"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
               {errors.confirmPassword && <div className="text-danger mb-2">{errors.confirmPassword}</div>}
             </div>
 
             <button type="submit" className="btn btn-danger w-100 mb-3" disabled={loading}>
-              {loading ? "Đang đăng ký..." : "Đăng ký"}
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Đang đăng ký...
+                </>
+              ) : (
+                "Đăng ký"
+              )}
             </button>
           </form>
 
           <p className="text-center mt-3">
             Đã có tài khoản?{" "}
-            <button className="text-danger text-decoration-none btn btn-link" onClick={() => toggleForm("login")}>
+            <button
+              className="text-danger text-decoration-none btn btn-link"
+              onClick={() => navigate("/dang-nhap")} // Điều hướng về trang đăng nhập
+            >
               Đăng nhập ngay
             </button>
           </p>

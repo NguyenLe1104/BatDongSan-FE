@@ -1,11 +1,10 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useChat } from "./context/ChatContext"; // Import useChat từ context
-
+import AuthPage from "./components/AuthPage";
 import AdminLayout from "./layout/AdminLayout"; // Layout riêng cho Admin
 import MainLayout from "./layout/MainLayout"; // Layout cho User
-
-
+import ForgotPassword from "./components/ForgotPassword";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Header from "./components/Header";
@@ -29,6 +28,8 @@ function App() {
         <Route path="/dang-ky" element={<RegisterForm />} />
         <Route path="/tin-tuc" element={<TinTuc />} />
         <Route path="/gioi-thieu" element={<GioiThieu />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
 
       {!isAdminPage && <Footer />}
