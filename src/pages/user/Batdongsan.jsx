@@ -29,13 +29,26 @@ function Batdongsan() {
 
     const handleSearch = async (filters) => {
         try {
-            const res = await nhaDatApi.search(filters);
+            // Chuyển đổi các trường số
+            const params = {
+                ...filters,
+                GiaMin: filters.GiaMin ? Number(filters.GiaMin) : undefined,
+                GiaMax: filters.GiaMax ? Number(filters.GiaMax) : undefined,
+                DienTichMin: filters.DienTichMin ? Number(filters.DienTichMin) : undefined,
+                DienTichMax: filters.DienTichMax ? Number(filters.DienTichMax) : undefined,
+            };
+    
+            // Loại bỏ các trường undefined
+            const cleanParams = Object.fromEntries(
+                Object.entries(params).filter(([_, v]) => v !== undefined)
+            );
+    
+            const res = await nhaDatApi.search(cleanParams);
             setNhaDatList(res.data);
         } catch (error) {
             console.error("Lỗi khi tìm kiếm:", error);
         }
     };
-
     return (
         <div>
             <TimKiem onSearch={handleSearch} />
