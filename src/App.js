@@ -5,7 +5,7 @@ import { useChat } from "./context/ChatContext"; // Import useChat từ context
 import AdminLayout from "./layout/AdminLayout"; // Layout riêng cho Admin
 import MainLayout from "./layout/MainLayout"; // Layout cho User
 import PrivateRoute from "./components/PrivateRoutes";
-
+import FormDangBai from "./components/FormDangBai"; 
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Header from "./components/Header";
@@ -31,6 +31,7 @@ function App() {
         <Route path="/dang-ky" element={<RegisterForm />} />
         <Route path="/tin-tuc" element={<TinTuc />} />
         <Route path="/gioi-thieu" element={<GioiThieu />} />
+        <Route path="/dang-bai" element={<FormDangBai />} />
       </Routes>
 
       {!isAdminPage && <Footer />}

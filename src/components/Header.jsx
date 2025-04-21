@@ -47,7 +47,7 @@ const Header = () => {
                             <Nav.Link href="/gioi-thieu">Giới thiệu</Nav.Link>
                             <Nav.Link href="/du-an">Dự án</Nav.Link>
                             <Nav.Link href="/tin-tuc">Tin tức</Nav.Link>
-                            <Nav.Link href="/wiki">Wiki BĐS</Nav.Link>
+                            <Nav.Link href="/dang-bai">Đăng Bài</Nav.Link>
                             <Nav.Link href="/ban-dat">Bán đất</Nav.Link>
                             <Nav.Link href="/danh-ba">Danh bạ</Nav.Link>
                         </Nav>
