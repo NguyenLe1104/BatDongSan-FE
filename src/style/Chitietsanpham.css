@@ -1,3 +1,14 @@
+.custom-card {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.custom-card .card-header {
+    background-color: transparent !important;
+    border-bottom: none !important;
+}
+
 .product-container {
     display: flex;
     flex-direction: column;
@@ -11,10 +22,10 @@
     width: 100%;
     max-width: 1200px;
     gap: 40px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: transparent; /* bỏ màu trắng */
+    padding: 0; /* bỏ padding dư thừa */
+    border-radius: 0; /* bỏ bo góc */
+    box-shadow: none; /* bỏ shadow */
 }
 
 .product-left {
@@ -190,6 +201,12 @@
     transform: scale(1.05);
     /* Hiệu ứng phóng nhẹ khi hover */
 }
+.card {
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
+}
+
 
 .product-description {
     width: 100%;
@@ -258,4 +275,26 @@
         padding: 15px;
         font-size: 14px;
     }
+}
+
+/* Trong file ChiTietBaiViet.css */
+.share-menu {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.share-menu button:hover {
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -21,7 +21,7 @@ function Batdongsan() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
+    const [totalItems, setTotalItems] = useState(0); // eslint-disable-line no-unused-vars
 
     const [formData, setFormData] = useState({
         MaNhaDat: "",
@@ -57,6 +57,7 @@ function Batdongsan() {
             ]);
 
             setNhaDatList(nhaDat.data);
+
             if (Array.isArray(loaiDat.data)) {
                 setLoaiDatList(loaiDat.data);
             } else if (Array.isArray(loaiDat)) {
@@ -86,10 +87,12 @@ function Batdongsan() {
         try {
             const data = await diaChiApi.getDistrictsByProvince(provinceCode);
             setDistricts(data);
-            setSelectedDistrict(""); // Reset district and ward
+            setSelectedDistrict("");
             setSelectedWard("");
+            return data; // trả về để dùng ngay
         } catch (error) {
             console.error("Lỗi khi tải danh sách quận/huyện:", error);
+            return [];
         }
     };
 
@@ -98,8 +101,10 @@ function Batdongsan() {
             const data = await diaChiApi.getWardsByDistrict(districtCode);
             setWards(data);
             setSelectedWard("");
+            return data; // trả về luôn
         } catch (error) {
             console.error("Lỗi khi tải danh sách xã/phường:", error);
+            return [];
         }
     };
 
@@ -117,62 +122,94 @@ function Batdongsan() {
 
     const handleSubmit = async () => {
         const { MaNhaDat, TenNhaDat, LoaiNhaDat_id } = formData;
-    
+
         if (!MaNhaDat || !TenNhaDat || !LoaiNhaDat_id || !selectedProvince || !selectedDistrict || !selectedWard) {
             Swal.fire('Lỗi!', 'Vui lòng nhập đầy đủ các thông tin bắt buộc!', 'error');
             return;
         }
+
         if (MaNhaDat.length > 10) {
-            Swal.fire('Lỗi!', 'Mã nhà đất quá dài. Vui lòng nhập lại(dưới 10 ký tự)!', 'error');
+            Swal.fire('Lỗi!', 'Mã nhà đất quá dài. Vui lòng nhập lại (dưới 10 ký tự)!', 'error');
             return;
         }
-    
+
         try {
+            showLoading();
+
+            // Lấy tên và loại bỏ "Thành phố", "Quận", "Huyện"
+            const provinceName = provinces.find(p => (p.code || p.Id) === selectedProvince)?.Name.replace(/Thành phố |Tỉnh /, "") || "";
+            const districtName = districts.find(d => (d.code || d.Id) === selectedDistrict)?.Name.replace(/Quận |Huyện /, "") || "";
+            const wardName = wards.find(w => (w.code || w.Id) === selectedWard)?.Name.replace(/Phường |Xã /, "") || "";
+
             const formDataToSend = new FormData();
             Object.entries({
                 ...formData,
-                ThanhPho: selectedProvince,
-                Quan: selectedDistrict,
-                Phuong: selectedWard
+                ThanhPho: provinceName,
+                Quan: districtName,
+                Phuong: wardName
             }).forEach(([key, value]) => {
                 formDataToSend.append(key, value);
             });
-    
+
             selectedImages.forEach(img => {
                 formDataToSend.append("images", img);
             });
-    
+
             if (isEditing) {
                 await nhaDatApi.update(formData.id, formDataToSend);
+                hideLoading();
                 Swal.fire('Cập nhật thành công!', '', 'success');
             } else {
                 await nhaDatApi.add(formDataToSend);
+                hideLoading();
                 Swal.fire('Thêm thành công!', '', 'success');
             }
-    
-            // Làm mới trang sau khi thêm/sửa thành công
+
             window.location.reload();
-            // Hoặc sử dụng loadData để cập nhật mà không làm mới toàn bộ trang
-            // await loadData(currentPage, 5);
             closeModal();
         } catch (error) {
-            console.log(error);
+            hideLoading();
             const errorMessage = error?.response?.data?.error || error?.response?.data?.message || 'Vui lòng thử lại.';
             Swal.fire('Lỗi!', errorMessage, 'error');
         }
     };
-    const handleEdit = (item) => {
+
+    const handleEdit = async (item) => {
         setFormData({
             ...item,
             LoaiNhaDat_id: item.LoaiNhaDat?.id || null,
+            ThanhPho: item.ThanhPho,
+            Quan: item.Quan,
+            Phuong: item.Phuong,
         });
-        setSelectedProvince(item.ThanhPho || "");
-        fetchDistricts(item.ThanhPho).then(() => {
-            setSelectedDistrict(item.Quan || "");
-            fetchWards(item.Quan).then(() => {
-                setSelectedWard(item.Phuong || "");
-            });
-        });
+
+        // Tìm province
+        const province = provinces.find(
+            (p) => p.Name.replace("Thành phố ", "") === item.ThanhPho || p.Name === item.ThanhPho
+        );
+        const provinceCode = province?.code || province?.Id || "";
+        setSelectedProvince(provinceCode);
+
+        if (provinceCode) {
+            // Lấy districts theo tỉnh
+            const districtData = await fetchDistricts(provinceCode);
+            const district = districtData.find(
+                (d) => d.Name.replace("Quận ", "") === item.Quan || d.Name === item.Quan
+            );
+            const districtCode = district?.code || district?.Id || "";
+            setSelectedDistrict(districtCode);
+
+            if (districtCode) {
+                // Lấy wards theo quận
+                const wardData = await fetchWards(districtCode);
+                const ward = wardData.find(
+                    (w) => w.Name.replace("Phường ", "") === item.Phuong || w.Name === item.Phuong
+                );
+                setSelectedWard(ward?.code || ward?.Id || "");
+            }
+        }
+
+        setCurrentImages(item.hinhAnh || []);
         setSelectedImages([]);
         setIsEditing(true);
         setShowModal(true);
@@ -190,11 +227,13 @@ function Batdongsan() {
     
         if (confirm.isConfirmed) {
             try {
+                showLoading(); // bật loading
                 await nhaDatApi.delete(id);
+                hideLoading(); // tắt loading
                 Swal.fire('Đã xóa!', 'Bất động sản đã bị xóa.', 'success');
-                // Làm mới trang sau khi xóa thành công
                 window.location.reload();
             } catch (error) {
+                hideLoading();
                 Swal.fire('Lỗi!', 'Không thể xóa.', 'error');
             }
         }
@@ -210,7 +249,6 @@ function Batdongsan() {
             DienTich: "",
             Huong: "",
             TrangThai: 1,
-            HinhAnh: "",
             ThanhPho: "",
             Quan: "",
             Phuong: "",
@@ -223,6 +261,7 @@ function Batdongsan() {
         setIsEditing(false);
         setShowModal(true);
         setSelectedImages([]);
+        setCurrentImages([]);
     };
 
     const closeModal = () => {
@@ -246,7 +285,22 @@ function Batdongsan() {
         setSelectedDistrict("");
         setSelectedWard("");
         setSelectedImages([]);
+        setCurrentImages([]);
         setIsEditing(false);
+    };
+
+    const showLoading = () => {
+        Swal.fire({
+            title: 'Đang xử lý...',
+            text: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    };
+    const hideLoading = () => {
+        Swal.close();
     };
 
     const handleImageChange = (e) => {
@@ -267,7 +321,11 @@ function Batdongsan() {
                             <th>Tên nhà đất</th>
                             <th>Loại</th>
                             <th>Mô tả</th>
-                            <th>Địa chỉ</th>
+                            <th>Thành phố</th>
+                            <th>Quận/Huyện</th>
+                            <th>Phường/Xã</th>
+                            <th>Đường</th>
+                            <th>Số nhà</th>
                             <th>Giá</th>
                             <th>Diện tích</th>
                             <th>Hướng</th>
@@ -284,7 +342,11 @@ function Batdongsan() {
                                 <td>{item.TenNhaDat}</td>
                                 <td>{item.LoaiNhaDat?.TenLoaiDat || "Không xác định"}</td>
                                 <td>{item.MoTa}</td>
-                                <td>{`${item.SoNha}, ${item.Duong}, ${item.Phuong}, ${item.Quan}, ${item.ThanhPho}`}</td>
+                                <td>{item.ThanhPho ? item.ThanhPho.replace(/Thành phố /, '') : ''}</td> {/* Kiểm tra null/undefined */}
+                                <td>{item.Quan ? item.Quan.replace(/Quận |Huyện /, '') : ''}</td> {/* Kiểm tra null/undefined */}
+                                <td>{item.Phuong ? item.Phuong.replace(/Phường |Xã /, '') : ''}</td> {/* Kiểm tra null/undefined */}
+                                <td>{item.Duong}</td>
+                                <td>{item.SoNha}</td>
                                 <td>{item.GiaBan.toLocaleString()} VNĐ</td>
                                 <td>{item.DienTich} m²</td>
                                 <td>{item.Huong}</td>
@@ -361,58 +423,58 @@ function Batdongsan() {
                                         <input type="text" className="form-control" name="SoNha" value={formData.SoNha} onChange={handleChange} placeholder="Số nhà" />
                                         <input type="text" className="form-control mt-2" name="Duong" value={formData.Duong} onChange={handleChange} placeholder="Đường" />
                                         <div className="mb-3 mt-2">
-                                        <label className="form-label">Tỉnh/Thành *</label>
-                                        <select
-                                            className="form-select"
-                                            value={selectedProvince}
-                                            onChange={(e) => {
-                                                setSelectedProvince(e.target.value);
-                                                fetchDistricts(e.target.value);
-                                            }}
-                                        >
-                                            <option value="">-- Chọn tỉnh/thành --</option>
-                                            {provinces.map(province => (
-                                                <option key={province.code || province.Id} value={province.code || province.Id}>
-                                                    {province.Name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Quận/Huyện *</label>
-                                        <select
-                                            className="form-select"
-                                            value={selectedDistrict}
-                                            onChange={(e) => {
-                                                setSelectedDistrict(e.target.value);
-                                                fetchWards(e.target.value);
-                                            }}
-                                            disabled={!selectedProvince}
-                                        >
-                                            <option value="">-- Chọn quận/huyện --</option>
-                                            {districts.map(district => (
-                                                <option key={district.code || district.Id} value={district.code || district.Id}>
-                                                    {district.Name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Phường/Xã *</label>
-                                        <select
-                                            className="form-select"
-                                            value={selectedWard}
-                                            onChange={(e) => setSelectedWard(e.target.value)}
-                                            disabled={!selectedDistrict}
-                                        >
-                                            <option value="">-- Chọn phường/xã --</option>
-                                            {wards.map(ward => (
-                                                <option key={ward.code || ward.Id} value={ward.code || ward.Id}>
-                                                    {ward.Name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                            <label className="form-label">* Tỉnh/Thành</label>
+                                            <select
+                                                className="form-select"
+                                                value={selectedProvince}
+                                                onChange={(e) => {
+                                                    setSelectedProvince(e.target.value);
+                                                    fetchDistricts(e.target.value);
+                                                }}
+                                            >
+                                                <option value="">-- Chọn tỉnh/thành --</option>
+                                                {provinces.map(province => (
+                                                    <option key={province.code || province.Id} value={province.code || province.Id}>
+                                                        {province.Name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label">* Quận/Huyện</label>
+                                            <select
+                                                className="form-select"
+                                                value={selectedDistrict}
+                                                onChange={(e) => {
+                                                    setSelectedDistrict(e.target.value);
+                                                    fetchWards(e.target.value);
+                                                }}
+                                                disabled={!selectedProvince}
+                                            >
+                                                <option value="">-- Chọn quận/huyện --</option>
+                                                {districts.map(district => (
+                                                    <option key={district.code || district.Id} value={district.code || district.Id}>
+                                                        {district.Name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label">* Phường/Xã</label>
+                                            <select
+                                                className="form-select"
+                                                value={selectedWard}
+                                                onChange={(e) => setSelectedWard(e.target.value)}
+                                                disabled={!selectedDistrict}
+                                            >
+                                                <option value="">-- Chọn phường/xã --</option>
+                                                {wards.map(ward => (
+                                                    <option key={ward.code || ward.Id} value={ward.code || ward.Id}>
+                                                        {ward.Name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
                                     <div className="row mb-3">
                                         <div className="col-md-4">

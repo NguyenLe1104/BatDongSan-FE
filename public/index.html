@@ -41,6 +41,49 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+       <div id="fb-root"></div>
+
+  <!-- Script khởi tạo Facebook SDK với kiểm tra lỗi -->
+   <!-- Script khởi tạo Facebook SDK với kiểm tra lỗi chi tiết -->
+  <script>
+    window.fbAsyncInit = function () {
+      try {
+        FB.init({
+          appId: '1990403858454221', // App ID của bạn
+          cookie: true,
+          xfbml: true,
+          version: 'v21.0', // Thử phiên bản mới nhất
+          status: true
+        });
+
+        // Tránh gọi getLoginStatus trên HTTP, chỉ log khởi tạo
+        console.log('Facebook SDK đã được khởi tạo');
+      } catch (error) {
+        console.error('Lỗi khi khởi tạo Facebook SDK:', error);
+      }
+    };
+
+    // Tải script Facebook SDK với fallback
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/vi_VN/sdk.js";
+      js.async = true;
+      js.defer = true;
+      js.crossOrigin = "anonymous";
+      js.onload = function() {
+        console.log('Facebook SDK đã tải thành công');
+      };
+      js.onerror = function() {
+        console.error('Lỗi khi tải Facebook SDK. Thử lại sau 2 giây...');
+        setTimeout(() => {
+          js.src = js.src; // Thử tải lại
+        }, 2000);
+      };
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
 </body>
 
 </html>
