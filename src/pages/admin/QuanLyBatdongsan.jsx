@@ -6,7 +6,7 @@ import { fetchNhaDatList, fetchLoaiNhaDatList } from '../../services/fetchData';
 import Swal from 'sweetalert2';
 import PhanTrang from '../../components/PhanTrang';
 import diaChiApi from '../../api/DiaChiApi';
-
+import "../../style/QuanLyBatDongSan.css";
 function Batdongsan() {
     const [showModal, setShowModal] = useState(false);
     const [nhaDatList, setNhaDatList] = useState([]);
@@ -14,15 +14,12 @@ function Batdongsan() {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-
     const [isEditing, setIsEditing] = useState(false);
     const [selectedImages, setSelectedImages] = useState([]);
     const [currentImages, setCurrentImages] = useState([]);
-
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0); // eslint-disable-line no-unused-vars
-
     const [formData, setFormData] = useState({
         MaNhaDat: "",
         TenNhaDat: "",
@@ -39,7 +36,6 @@ function Batdongsan() {
         Duong: "",
         SoNha: ""
     });
-
     const [selectedProvince, setSelectedProvince] = useState("");
     const [selectedDistrict, setSelectedDistrict] = useState("");
     const [selectedWard, setSelectedWard] = useState("");
@@ -57,7 +53,6 @@ function Batdongsan() {
             ]);
 
             setNhaDatList(nhaDat.data);
-
             if (Array.isArray(loaiDat.data)) {
                 setLoaiDatList(loaiDat.data);
             } else if (Array.isArray(loaiDat)) {
@@ -65,7 +60,6 @@ function Batdongsan() {
             } else {
                 setLoaiDatList([]);
             }
-
             setCurrentPage(nhaDat.currentPage);
             setTotalPages(nhaDat.totalPages);
             setTotalItems(nhaDat.totalItems);
@@ -89,7 +83,7 @@ function Batdongsan() {
             setDistricts(data);
             setSelectedDistrict("");
             setSelectedWard("");
-            return data; // trả về để dùng ngay
+            return data;
         } catch (error) {
             console.error("Lỗi khi tải danh sách quận/huyện:", error);
             return [];
@@ -101,7 +95,7 @@ function Batdongsan() {
             const data = await diaChiApi.getWardsByDistrict(districtCode);
             setWards(data);
             setSelectedWard("");
-            return data; // trả về luôn
+            return data;
         } catch (error) {
             console.error("Lỗi khi tải danh sách xã/phường:", error);
             return [];
@@ -135,12 +129,9 @@ function Batdongsan() {
 
         try {
             showLoading();
-
-            // Lấy tên và loại bỏ "Thành phố", "Quận", "Huyện"
             const provinceName = provinces.find(p => (p.code || p.Id) === selectedProvince)?.Name.replace(/Thành phố |Tỉnh /, "") || "";
             const districtName = districts.find(d => (d.code || d.Id) === selectedDistrict)?.Name.replace(/Quận |Huyện /, "") || "";
             const wardName = wards.find(w => (w.code || w.Id) === selectedWard)?.Name.replace(/Phường |Xã /, "") || "";
-
             const formDataToSend = new FormData();
             Object.entries({
                 ...formData,
@@ -183,7 +174,6 @@ function Batdongsan() {
             Phuong: item.Phuong,
         });
 
-        // Tìm province
         const province = provinces.find(
             (p) => p.Name.replace("Thành phố ", "") === item.ThanhPho || p.Name === item.ThanhPho
         );
@@ -191,7 +181,6 @@ function Batdongsan() {
         setSelectedProvince(provinceCode);
 
         if (provinceCode) {
-            // Lấy districts theo tỉnh
             const districtData = await fetchDistricts(provinceCode);
             const district = districtData.find(
                 (d) => d.Name.replace("Quận ", "") === item.Quan || d.Name === item.Quan
@@ -200,7 +189,6 @@ function Batdongsan() {
             setSelectedDistrict(districtCode);
 
             if (districtCode) {
-                // Lấy wards theo quận
                 const wardData = await fetchWards(districtCode);
                 const ward = wardData.find(
                     (w) => w.Name.replace("Phường ", "") === item.Phuong || w.Name === item.Phuong
@@ -224,12 +212,12 @@ function Batdongsan() {
             confirmButtonText: 'Có, xóa!',
             cancelButtonText: 'Hủy'
         });
-    
+
         if (confirm.isConfirmed) {
             try {
-                showLoading(); // bật loading
+                showLoading();
                 await nhaDatApi.delete(id);
-                hideLoading(); // tắt loading
+                hideLoading();
                 Swal.fire('Đã xóa!', 'Bất động sản đã bị xóa.', 'success');
                 window.location.reload();
             } catch (error) {
@@ -299,6 +287,7 @@ function Batdongsan() {
             }
         });
     };
+
     const hideLoading = () => {
         Swal.close();
     };
@@ -313,64 +302,78 @@ function Batdongsan() {
             <h2 className="mb-4">Bất động sản</h2>
             <button type="button" className="btn btn-primary mb-3" onClick={openModal}>Thêm bất động sản</button>
             {nhaDatList.length > 0 ? (
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã nhà đất</th>
-                            <th>Tên nhà đất</th>
-                            <th>Loại</th>
-                            <th>Mô tả</th>
-                            <th>Thành phố</th>
-                            <th>Quận/Huyện</th>
-                            <th>Phường/Xã</th>
-                            <th>Đường</th>
-                            <th>Số nhà</th>
-                            <th>Giá</th>
-                            <th>Diện tích</th>
-                            <th>Hướng</th>
-                            <th>Trạng thái</th>
-                            <th>Hình ảnh</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {nhaDatList.map((item, index) => (
-                            <tr key={item.id}>
-                                <td>{index + 1}</td>
-                                <td>{item.MaNhaDat}</td>
-                                <td>{item.TenNhaDat}</td>
-                                <td>{item.LoaiNhaDat?.TenLoaiDat || "Không xác định"}</td>
-                                <td>{item.MoTa}</td>
-                                <td>{item.ThanhPho ? item.ThanhPho.replace(/Thành phố /, '') : ''}</td> {/* Kiểm tra null/undefined */}
-                                <td>{item.Quan ? item.Quan.replace(/Quận |Huyện /, '') : ''}</td> {/* Kiểm tra null/undefined */}
-                                <td>{item.Phuong ? item.Phuong.replace(/Phường |Xã /, '') : ''}</td> {/* Kiểm tra null/undefined */}
-                                <td>{item.Duong}</td>
-                                <td>{item.SoNha}</td>
-                                <td>{item.GiaBan.toLocaleString()} VNĐ</td>
-                                <td>{item.DienTich} m²</td>
-                                <td>{item.Huong}</td>
-                                <td>{item.TrangThai === 1 ? 'Đang bán' : 'Đã bán'}</td>
-                                <td>
-                                    <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', maxWidth: '150px' }}>
-                                        {item.hinhAnh?.map((img, idx) => (
-                                            <img
-                                                key={idx}
-                                                src={img.url}
-                                                alt={`Hình ảnh ${idx + 1}`}
-                                                style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px' }}
-                                            />
-                                        ))}
-                                    </div>
-                                </td>
-                                <td>
-                                    <button className="btn btn-warning me-2" onClick={() => handleEdit(item)}>Sửa</button>
-                                    <button className="btn btn-danger" onClick={() => handleDelete(item.id)}>Xóa</button>
-                                </td>
+                <div className="table-container">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã nhà đất</th>
+                                <th>Tên nhà đất</th>
+                                <th>Loại</th>
+                                <th>Mô tả</th>
+                                <th>Thành phố</th>
+                                <th>Quận/Huyện</th>
+                                <th>Phường/Xã</th>
+                                <th>Đường</th>
+                                <th>Số nhà</th>
+                                <th>Giá</th>
+                                <th>Diện tích</th>
+                                <th>Hướng</th>
+                                <th>Trạng thái</th>
+                                <th>Hình ảnh</th>
+                                <th>Hành động</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {nhaDatList.map((item, index) => (
+                                <tr key={item.id}>
+                                    <td>{index + 1}</td>
+                                    <td>{item.MaNhaDat}</td>
+                                    <td>{item.TenNhaDat}</td>
+                                    <td>{item.LoaiNhaDat?.TenLoaiDat || "Không xác định"}</td>
+                                    <td>{item.MoTa}</td>
+                                    <td>{item.ThanhPho ? item.ThanhPho.replace(/Thành phố /, '') : ''}</td>
+                                    <td>{item.Quan ? item.Quan.replace(/Quận |Huyện /, '') : ''}</td>
+                                    <td>{item.Phuong ? item.Phuong.replace(/Phường |Xã /, '') : ''}</td>
+                                    <td>{item.Duong}</td>
+                                    <td>{item.SoNha}</td>
+                                    <td>{item.GiaBan.toLocaleString()} VNĐ</td>
+                                    <td>{item.DienTich} m²</td>
+                                    <td>{item.Huong}</td>
+                                    <td>{item.TrangThai === 1 ? 'Đang bán' : 'Đã bán'}</td>
+                                    <td>
+                                        <div className="image-list">
+                                            {item.hinhAnh?.map((img, idx) => (
+                                                <img
+                                                    key={idx}
+                                                    src={img.url}
+                                                    alt={`Hình ảnh ${idx + 1}`}
+                                                    className="post-image"
+                                                />
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="action-buttons">
+                                            <button
+                                                className="btn btn-sm btn-warning action-btn edit-btn"
+                                                onClick={() => handleEdit(item)}
+                                            >
+                                                <i className="fas fa-edit icon-small"></i> Sửa
+                                            </button>
+                                            <button
+                                                className="btn btn-sm btn-danger action-btn delete-btn"
+                                                onClick={() => handleDelete(item.id)}
+                                            >
+                                                <i className="fas fa-trash icon-small"></i> Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             ) : (
                 <p className="text-center text-muted">Chưa có dữ liệu nhà đất.</p>
             )}
@@ -392,11 +395,24 @@ function Batdongsan() {
                                 <form>
                                     <div className="mb-3">
                                         <label className="form-label">Mã nhà đất *</label>
-                                        <input type="text" maxLength="10" className="form-control" name="MaNhaDat" value={formData.MaNhaDat} onChange={handleChange} />
+                                        <input
+                                            type="text"
+                                            maxLength="10"
+                                            className="form-control"
+                                            name="MaNhaDat"
+                                            value={formData.MaNhaDat}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Tên nhà đất *</label>
-                                        <input type="text" className="form-control" name="TenNhaDat" value={formData.TenNhaDat} onChange={handleChange} />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="TenNhaDat"
+                                            value={formData.TenNhaDat}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Loại nhà đất *</label>
@@ -416,13 +432,33 @@ function Batdongsan() {
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Mô tả</label>
-                                        <input type="text" className="form-control" name="MoTa" value={formData.MoTa} onChange={handleChange} />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="MoTa"
+                                            value={formData.MoTa}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Địa chỉ</label>
-                                        <input type="text" className="form-control" name="SoNha" value={formData.SoNha} onChange={handleChange} placeholder="Số nhà" />
-                                        <input type="text" className="form-control mt-2" name="Duong" value={formData.Duong} onChange={handleChange} placeholder="Đường" />
-                                        <div className="mb-3 mt-2">
+                                        <input
+                                            type="text"
+                                            className="form-control address-input"
+                                            name="SoNha"
+                                            value={formData.SoNha}
+                                            onChange={handleChange}
+                                            placeholder="Số nhà"
+                                        />
+                                        <input
+                                            type="text"
+                                            className="form-control address-input"
+                                            name="Duong"
+                                            value={formData.Duong}
+                                            onChange={handleChange}
+                                            placeholder="Đường"
+                                        />
+                                        <div className="mb-3 address-select">
                                             <label className="form-label">* Tỉnh/Thành</label>
                                             <select
                                                 className="form-select"
@@ -440,7 +476,7 @@ function Batdongsan() {
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="mb-3">
+                                        <div className="mb-3 address-select">
                                             <label className="form-label">* Quận/Huyện</label>
                                             <select
                                                 className="form-select"
@@ -459,7 +495,7 @@ function Batdongsan() {
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="mb-3">
+                                        <div className="mb-3 address-select">
                                             <label className="form-label">* Phường/Xã</label>
                                             <select
                                                 className="form-select"
@@ -476,18 +512,36 @@ function Batdongsan() {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="row mb-3">
+                                    <div className="row mb-3 property-details">
                                         <div className="col-md-4">
                                             <label className="form-label">Giá</label>
-                                            <input type="text" className="form-control" name="GiaBan" value={formData.GiaBan} onChange={handleChange} />
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="GiaBan"
+                                                value={formData.GiaBan}
+                                                onChange={handleChange}
+                                            />
                                         </div>
                                         <div className="col-md-4">
                                             <label className="form-label">Diện tích</label>
-                                            <input type="text" className="form-control" name="DienTich" value={formData.DienTich} onChange={handleChange} />
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="DienTich"
+                                                value={formData.DienTich}
+                                                onChange={handleChange}
+                                            />
                                         </div>
                                         <div className="col-md-4">
                                             <label className="form-label">Hướng</label>
-                                            <input type="text" className="form-control" name="Huong" value={formData.Huong} onChange={handleChange} />
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="Huong"
+                                                value={formData.Huong}
+                                                onChange={handleChange}
+                                            />
                                         </div>
                                     </div>
                                     <div className="mb-3">
@@ -500,32 +554,30 @@ function Batdongsan() {
                                             multiple
                                             accept="image/*"
                                         />
-
                                         {isEditing && currentImages.length > 0 && (
-                                            <div className="mt-2">
-                                                <div className="d-flex flex-wrap gap-2">
-                                                    {currentImages.map((img, index) => (
-                                                        <img
-                                                            key={index}
-                                                            src={typeof img === 'string' ? img : img.url}
-                                                            alt={`Ảnh ${index}`}
-                                                            style={{ width: "80px", height: "80px", objectFit: "cover", border: "1px solid #ccc", borderRadius: "4px" }}
-                                                        />
-                                                    ))}
-                                                </div>
+                                            <div className="image-preview-container">
+                                                {currentImages.map((img, index) => (
+                                                    <img
+                                                        key={index}
+                                                        src={typeof img === 'string' ? img : img.url}
+                                                        alt={`Ảnh ${index}`}
+                                                        className="image-preview"
+                                                    />
+                                                ))}
                                             </div>
                                         )}
-
-                                        <div className="mt-2 d-flex flex-wrap gap-2">
-                                            {selectedImages.map((file, index) => (
-                                                <img
-                                                    key={index}
-                                                    src={URL.createObjectURL(file)}
-                                                    alt={`Preview ${index}`}
-                                                    style={{ width: "80px", height: "80px", objectFit: "cover" }}
-                                                />
-                                            ))}
-                                        </div>
+                                        {selectedImages.length > 0 && (
+                                            <div className="image-preview-container">
+                                                {selectedImages.map((file, index) => (
+                                                    <img
+                                                        key={index}
+                                                        src={URL.createObjectURL(file)}
+                                                        alt={`Preview ${index}`}
+                                                        className="image-preview"
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </form>
                             </div>

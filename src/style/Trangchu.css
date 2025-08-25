@@ -42,17 +42,13 @@ h2 {
   margin: 10px 0;
 }
 
-
-
-
+/* Bố cục bất động sản */
 .real-estate-container {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   grid-template-rows: auto auto;
   gap: 20px;
-  /* Tăng khoảng cách giữa các ảnh */
   max-width: 1200px;
-  /* Tăng chiều rộng tổng thể */
   margin: auto;
   background: #f8f8f8;
   padding: 30px;
@@ -83,7 +79,7 @@ h2 {
   grid-row: span 2;
 }
 
-/* Các hình còn lại có cùng kích thước */
+/* Các hình còn lại */
 .real-estate-card:nth-child(2),
 .real-estate-card:nth-child(3),
 .real-estate-card:nth-child(4),
@@ -92,7 +88,7 @@ h2 {
   grid-row: span 1;
 }
 
-/* Điều chỉnh Cần Thơ & Đà Nẵng cho to hơn */
+/* Cần Thơ & Đà Nẵng to hơn */
 .real-estate-card:nth-child(4),
 .real-estate-card:nth-child(5) {
   height: 300px;
@@ -111,7 +107,7 @@ h2 {
   font-weight: bold;
 }
 
-
+/* Card tính năng */
 .feature-card {
   padding: 20px;
   border-radius: 10px;
@@ -138,6 +134,7 @@ h2 {
   color: #666;
 }
 
+/* Responsive */
 @media (max-width: 992px) {
   .real-estate-container {
     grid-template-columns: 1fr 1fr;
@@ -209,4 +206,25 @@ h2 {
   .card-image {
     height: 90px;
   }
+}
+
+/* ===== Navbar fix xuống hàng ===== */
+.navbar-nav {
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+}
+
+.navbar-nav .nav-link {
+  white-space: nowrap;        /* không cho xuống hàng */
+  padding: 0.5rem 0.75rem;    /* thu gọn khoảng cách */
+}
+
+.navbar-nav .dropdown {
+  white-space: nowrap;
+}
+
+.navbar-nav .btn {
+  white-space: nowrap;
 }

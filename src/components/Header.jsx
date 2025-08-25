@@ -31,53 +31,48 @@ const Header = () => {
     return (
         <header>
             <Navbar bg="light" expand="lg" className="border-bottom">
-                <Container>
-                    <Navbar.Brand href="/" className="d-flex align-items-center">
-                        <img src={Logo} alt="Logo" className="me-2" style={{ width: '50px', height: 'auto' }} />
-                        <div >
-                            <strong>BlackS City</strong>
+  <Container>
+    <Navbar.Brand href="/" className="d-flex align-items-center">
+      <img src={Logo} alt="Logo" className="me-2" style={{ width: '50px', height: 'auto' }} />
+      <div>
+        <strong>BlackS City</strong>
+      </div>
+    </Navbar.Brand>
 
-                        </div>
-                    </Navbar.Brand>
-                    <Navbar.Toggle aria-controls="navbar-nav" />
-                    <Navbar.Collapse id="navbar-nav">
-                        <Nav className="ms-auto">
-                            <Nav.Link onClick={() => navigate("/")}>Trang Chủ</Nav.Link>
-                            <Nav.Link onClick={() => navigate("/bat-dong-san")}>Bất động sản</Nav.Link>
-                            <Nav.Link href="/tin-tuc">Tin tức</Nav.Link>
-                            <Nav.Link href="/gioi-thieu">Giới thiệu</Nav.Link>
-                            <Nav.Link href="/du-an">Dự án</Nav.Link>
-                           
-                            <Nav.Link href="/wiki">Wiki BĐS</Nav.Link>
-                            <Nav.Link href="/ban-dat">Bán đất</Nav.Link>
-                            <Nav.Link href="/form-bai-viet">Đăng bài viết</Nav.Link>
+    <Navbar.Toggle aria-controls="navbar-nav" />
+    <Navbar.Collapse id="navbar-nav">
+      <Nav className="ms-auto d-flex align-items-center">
+        <Nav.Link onClick={() => navigate("/")}>Trang Chủ</Nav.Link>
+        <Nav.Link onClick={() => navigate("/bat-dong-san")}>Bất động sản</Nav.Link>
+        <Nav.Link href="/tin-tuc">Tin tức</Nav.Link>
+        <Nav.Link href="/gioi-thieu">Giới thiệu</Nav.Link>
+        <Nav.Link href="/du-an">Dự án</Nav.Link>
+        <Nav.Link href="/wiki">Wiki BĐS</Nav.Link>
+        <Nav.Link href="/ban-dat">Bán đất</Nav.Link>
+        <Nav.Link href="/form-bai-viet">Đăng bài viết</Nav.Link>
 
-                        </Nav>
-                        <div className="d-flex ms-3">
-                            {user ? (
-                                <NavDropdown title={<span className="fw-bold fs-5">{user}</span>} id="user-dropdown">
+        {/* User control */}
+        {user ? (
+          <NavDropdown title={<span className="fw-bold fs-5">{user}</span>} id="user-dropdown">
+            <NavDropdown.Item onClick={() => navigate("/profile")}>Hồ sơ</NavDropdown.Item>
+            <NavDropdown.Item onClick={() => navigate("/danh-muc-yeu-thich")}>Danh mục yêu thích</NavDropdown.Item>
+            <NavDropdown.Item onClick={handleLogout}>Đăng xuất</NavDropdown.Item>
+          </NavDropdown>
+        ) : (
+          <div className="d-flex align-items-center ms-3">
+            <Button variant="outline-primary" className="me-2" onClick={() => navigate("/dang-nhap")}>
+              Đăng nhập
+            </Button>
+            <Button variant="danger" onClick={() => navigate("/dang-ky")}>
+              Đăng ký
+            </Button>
+          </div>
+        )}
+      </Nav>
+    </Navbar.Collapse>
+  </Container>
+</Navbar>
 
-                                    <NavDropdown.Item onClick={() => navigate("/profile")}>Hồ sơ</NavDropdown.Item>
-                                   
-                                    <NavDropdown.Item onClick={() => navigate("/danh-muc-yeu-thich")}>
-                                    Danh mục yêu thích
-                                </NavDropdown.Item>
-                                    <NavDropdown.Item onClick={handleLogout}>Đăng xuất</NavDropdown.Item>
-                                </NavDropdown>
-                            ) : (   
-                                <>
-                                    <Button variant="outline-primary" className="me-2" onClick={() => navigate("/dang-nhap")}>
-                                        Đăng nhập
-                                    </Button>
-                                    <Button variant="danger" onClick={() => navigate("/dang-ky")}>
-                                        Đăng ký
-                                    </Button>
-                                </>
-                            )}
-                        </div>
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
         </header>
     );
 };

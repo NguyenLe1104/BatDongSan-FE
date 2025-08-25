@@ -28,9 +28,11 @@ const Trangchu = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const navigate = useNavigate();
-
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     useEffect(() => {
-        loadData(1, true); // load trang đầu khi vào trang chủ
+        const token = localStorage.getItem("authToken");
+        setIsLoggedIn(!!token);
+        loadData(1, true); 
     }, []);
 
     const loadData = async (pageToLoad = 1, isFirst = false) => {
@@ -82,13 +84,23 @@ const Trangchu = () => {
                     >
                         Tìm kiếm ngay
                     </Button>
-                    <Button
-                        variant="outline-light"
-                        size="lg"
-                        onClick={() => navigate("/form-bai-viet")}
-                    >
-                        Đăng tin miễn phí
-                    </Button>
+                    {isLoggedIn ? (
+                        <Button
+                            variant="outline-light"
+                            size="lg"
+                            onClick={() => navigate("/form-bai-viet")}
+                        >
+                            Đăng tin miễn phí
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="outline-light"
+                            size="lg"
+                            onClick={() => navigate("/dang-nhap")}
+                        >
+                            Đăng nhập để đăng tin
+                        </Button>
+                    )}
                 </Container>
             </div>
 
